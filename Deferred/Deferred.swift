@@ -8,17 +8,36 @@
 
 import Foundation
 
+public protocol Deferable {
+    typealias Type;
+
+    typealias UponBlock = (dispatch_queue_t, Type -> ())
+    var isFilled: Bool { get }
+    func fill(value: Type)
+    func fillIfUnfilled(value: Type)
+    func peek() -> Type?
+    func uponQueue(queue: dispatch_queue_t, block: Type -> ())
+    var value: Type { get }
+    func bindQueue<U>(queue: dispatch_queue_t, f: Type -> Deferable) -> Deferable
+    func mapQueue<U>(queue: dispatch_queue_t, f: Type -> U) -> Deferable
+    func upon(block: Type ->())
+    func bind<U>(f: Type -> Deferable) -> Deferable
+    func map<U>(f: Type -> U) -> Deferable
+    func both<U>(other: Deferable) -> Deferable
+}
+
 // TODO: Replace this with a class var
 private var DeferredDefaultQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
 
-public final class Deferred<T> {
+public final class Deferred<T> : Deferable {
+    typealias Type = T
     typealias UponBlock = (dispatch_queue_t, T -> ())
     private typealias Protected = (protectedValue: T?, uponBlocks: [UponBlock])
 
     private var protected: LockProtected<Protected>
     private let defaultQueue: dispatch_queue_t
 
-    private init(value: T?, queue: dispatch_queue_t) {
+        init(value: T?, queue: dispatch_queue_t) {
         protected = LockProtected(item: (value, []))
         self.defaultQueue = queue
     }
@@ -98,7 +117,7 @@ extension Deferred {
 }
 
 extension Deferred {
-    public func bindQueue<U>(queue: dispatch_queue_t, f: T -> Deferred<U>) -> Deferred<U> {
+    public func bindQueue<U, V:Deferable>(queue: dispatch_queue_t, f: T -> V) -> V {
         let d = Deferred<U>()
         self.uponQueue(queue) {
             f($0).uponQueue(queue) {
@@ -108,7 +127,7 @@ extension Deferred {
         return d
     }
 
-    public func mapQueue<U>(queue: dispatch_queue_t, f: T -> U) -> Deferred<U> {
+    public func mapQueue<U, V:Deferable>(queue: dispatch_queue_t, f: T -> U) -> V {
         return bindQueue(queue) { t in Deferred<U>(value: f(t)) }
     }
 }
@@ -122,7 +141,7 @@ extension Deferred {
         return bindQueue(defaultQueue, f: f)
     }
 
-    public func map<U>(f: T -> U) -> Deferred<U> {
+    public func map<U, V: Deferable>(f: T -> U) -> V {
         return mapQueue(defaultQueue, f: f)
     }
 }
