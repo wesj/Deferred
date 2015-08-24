@@ -84,7 +84,7 @@ public final class CASSpinLock: ReadWriteLock {
 
     public func withWriteLock<T>(block: () -> T) -> T {
         // spin until we acquire write lock
-        do {
+        repeat {
             let state = _state.memory
 
             // if there are no readers and no one holds the write lock, try to grab the write lock immediately
@@ -105,7 +105,7 @@ public final class CASSpinLock: ReadWriteLock {
         let result = block()
 
         // unlock
-        do {
+        repeat {
             let state = _state.memory
 
             // clear everything except (possibly) WRITER_WAITING_BIT, which will only be set
@@ -120,7 +120,7 @@ public final class CASSpinLock: ReadWriteLock {
 
     public func withReadLock<T>(block: () -> T) -> T {
         // spin until we acquire read lock
-        do {
+        repeat {
             let state = _state.memory
 
             // if there is no writer and no writer waiting, try to increment reader count
@@ -134,7 +134,7 @@ public final class CASSpinLock: ReadWriteLock {
         let result = block()
 
         // decrement reader count
-        do {
+        repeat {
             let state = _state.memory
 
             // sanity check that we have a positive reader count before decrementing it

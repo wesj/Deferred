@@ -293,6 +293,7 @@
 		523E0098199915C500E07C3C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0600;
 				ORGANIZATIONNAME = "Big Nerd Ranch";
 				TargetAttributes = {
@@ -679,6 +680,7 @@
 				52B9AF2D19C35F110039E5D7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		52B9AF3119C35F110039E5D7 /* Build configuration list for PBXNativeTarget "DeferredMacTests" */ = {
 			isa = XCConfigurationList;
@@ -687,6 +689,7 @@
 				52B9AF2F19C35F110039E5D7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
